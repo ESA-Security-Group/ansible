@@ -30,10 +30,6 @@ description:
 - Be carefull when marking a language as trusted since this could be a potential
   security breach. Untrusted languages allow only users with the PostgreSQL superuser
   privilege to use this language to create new functions.
-- For more information about PostgreSQL languages see the official documentation
-  U(https://www.postgresql.org/docs/current/sql-createlanguage.html),
-  U(https://www.postgresql.org/docs/current/sql-alterlanguage.html),
-  U(https://www.postgresql.org/docs/current/sql-droplanguage.html).
 version_added: '1.7'
 options:
   lang:
@@ -107,17 +103,19 @@ options:
     type: str
     aliases: [ ssl_rootcert ]
     version_added: '2.8'
-notes:
-- The default authentication assumes that you are either logging in as or
-  sudo'ing to the postgres account on the host.
-- This module uses psycopg2, a Python PostgreSQL database adapter. You must
-  ensure that psycopg2 is installed on the host before using this module.
-- If the remote host is the PostgreSQL server (which is the default case), then
-  PostgreSQL must also be installed on the remote host.
-- For Ubuntu-based systems, install the postgresql, libpq-dev, and python-psycopg2 packages
-  on the remote host before using this module.
-requirements: [ psycopg2 ]
-
+seealso:
+- name: PostgreSQL languages
+  description: General information about PostgreSQL languages.
+  link: https://www.postgresql.org/docs/current/xplang.html
+- name: CREATE LANGUAGE reference
+  description: Complete reference of the CREATE LANGUAGE command documentation.
+  link: https://www.postgresql.org/docs/current/sql-createlanguage.html
+- name: ALTER LANGUAGE reference
+  description: Complete reference of the ALTER LANGUAGE command documentation.
+  link: https://www.postgresql.org/docs/current/sql-alterlanguage.html
+- name: DROP LANGUAGE reference
+  description: Complete reference of the DROP LANGUAGE command documentation.
+  link: https://www.postgresql.org/docs/current/sql-droplanguage.html
 author:
 - Jens Depuydt (@jensdepuydt)
 - Thomas O'Donnell (@andytom)
@@ -170,9 +168,11 @@ queries:
 '''
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.postgres import connect_to_db, postgres_common_argument_spec
-from ansible.module_utils._text import to_native
-from ansible.module_utils.database import pg_quote_identifier
+from ansible.module_utils.postgres import (
+    connect_to_db,
+    get_conn_params,
+    postgres_common_argument_spec,
+)
 
 executed_queries = []
 
@@ -254,7 +254,8 @@ def main():
     cascade = module.params["cascade"]
     fail_on_drop = module.params["fail_on_drop"]
 
-    db_connection = connect_to_db(module, autocommit=False)
+    conn_params = get_conn_params(module, module.params)
+    db_connection = connect_to_db(module, conn_params, autocommit=False)
     cursor = db_connection.cursor()
 
     changed = False

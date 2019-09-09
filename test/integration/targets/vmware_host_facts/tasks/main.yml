@@ -18,13 +18,15 @@
         that:
           - "'ansible_hostname' in facts['ansible_facts']"
           - "'ansible_processor' in facts['ansible_facts']"
+          - "'ansible_in_maintenance_mode' in facts['ansible_facts']"
+          - "'ansible_uptime' in facts['ansible_facts']"
 
     - name: get host facts through from a host
       vmware_host_facts:
         validate_certs: False
         hostname: '{{ esxi1 }}'
-        username: '{{ hostvars[esxi1].ansible_user }}'
-        password: '{{ hostvars[esxi1].ansible_password }}'
+        username: '{{ esxi_user }}'
+        password: '{{ esxi_password }}'
       register: facts
     - debug: var=facts
     - name: verify some data,like ansible_processor
@@ -32,3 +34,5 @@
         that:
           - "'ansible_hostname' in facts['ansible_facts']"
           - "'ansible_processor' in facts['ansible_facts']"
+          - "'ansible_in_maintenance_mode' in facts['ansible_facts']"
+          - "'ansible_uptime' in facts['ansible_facts']"

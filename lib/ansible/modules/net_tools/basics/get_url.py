@@ -61,6 +61,7 @@ options:
         will only be downloaded if the destination does not exist. Generally
         should be C(yes) only for small local files.
       - Prior to 0.6, this module behaved as if C(yes) was the default.
+      - Alias C(thirsty) has been deprecated and will be removed in 2.13.
     type: bool
     default: no
     aliases: [ thirsty ]
@@ -93,7 +94,8 @@ options:
       - Additionally, if a checksum is passed to this parameter, and the file exist under
         the C(dest) location, the I(destination_checksum) would be calculated, and if
         checksum equals I(destination_checksum), the file download would be skipped
-        (unless C(force) is true).
+        (unless C(force) is true). If the checksum does not equal I(destination_checksum),
+        the destination file is deleted.
     type: str
     default: ''
     version_added: "2.0"
@@ -222,7 +224,7 @@ EXAMPLES = r'''
     dest: /tmp/afilecopy.txt
 
 - name: < Fetch file that requires authentication.
-        username/password only availabe since 2.8, in older versions you ned to use url_username/url_password
+        username/password only availabe since 2.8, in older versions you need to use url_username/url_password
   get_url:
     url: http://example.com/path/file.conf
     dest: /etc/foo.conf
@@ -444,6 +446,9 @@ def main():
         supports_check_mode=True,
         mutually_exclusive=[['checksum', 'sha256sum']],
     )
+
+    if module.params.get('thirsty'):
+        module.deprecate('The alias "thirsty" has been deprecated and will be removed, use "force" instead', version='2.13')
 
     url = module.params['url']
     dest = module.params['dest']
